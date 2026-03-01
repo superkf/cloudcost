@@ -1,9 +1,12 @@
 # ☁️💰 CloudCost
 
-**Estimate your cloud costs before you deploy.** Built for vibe coders who ship first and ask questions later.
+**Know your cloud bill before you deploy.** AI-powered cost estimation for vibe coders.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![VS Code](https://img.shields.io/badge/VS%20Code-Extension-007ACC)
+![No API Key](https://img.shields.io/badge/API%20Key-Not%20Required-green)
+
+> 🔒 **100% local** - No API keys, no accounts, no code sent to cloud. Just install and use.
 
 ## The Problem
 
@@ -104,9 +107,14 @@ Or just look at the status bar - it auto-updates on save.
 2. **Estimate** - Uses real pricing data + typical usage patterns
 3. **Display** - Shows a breakdown with warnings and suggestions
 
-## BYOK (Bring Your Own Knowledge)
+## 🔒 Zero API Keys Required
 
-This is open source. No tracking. No accounts. No API keys needed.
+- ✅ **No API keys needed** - works completely offline
+- ✅ **No cloud dependencies** - all analysis runs locally  
+- ✅ **No code sent anywhere** - your code stays on your machine
+- ✅ **No accounts** - just install and use
+
+100% open source. Privacy-first by design.
 
 Want to add a service? Edit `src/estimators/pricing-data.ts` and submit a PR.
 
