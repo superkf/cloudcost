@@ -18,13 +18,12 @@
     "cloud",
     "cost",
     "pricing",
-    "estimate",
     "cloudflare",
     "vercel",
     "aws",
-    "serverless",
-    "vibe-coding",
-    "devops"
+    "openai",
+    "anthropic",
+    "vibe-coding"
   ],
   "bin": {
     "cloudcost": "./dist/cli.js"
@@ -41,17 +40,6 @@
   "categories": [
     "Other",
     "Visualization"
-  ],
-  "keywords": [
-    "cloud",
-    "cost",
-    "pricing",
-    "cloudflare",
-    "vercel",
-    "aws",
-    "openai",
-    "anthropic",
-    "vibe-coding"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -103,5 +91,7 @@
     "eslint": "^8.0.0",
     "typescript": "^5.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1"
+  }
 }
