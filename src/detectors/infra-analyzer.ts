@@ -322,6 +322,15 @@ export function analyzeDockerConfig(projectPath: string): InfraUsagePattern | nu
   const railwayPath = path.join(projectPath, 'railway.json');
   const railwayTomlPath = path.join(projectPath, 'railway.toml');
   
+  // Skip if using other PaaS (they handle Docker internally)
+  const renderPath = path.join(projectPath, 'render.yaml');
+  const flyPath = path.join(projectPath, 'fly.toml');
+  const herokuPath = path.join(projectPath, 'Procfile');
+  
+  if (fs.existsSync(renderPath)) return null;  // Render handles Docker
+  if (fs.existsSync(flyPath)) return null;     // Fly handles Docker
+  if (fs.existsSync(herokuPath)) return null;  // Heroku handles Docker
+  
   const hasDocker = fs.existsSync(dockerPath);
   const hasRailway = fs.existsSync(railwayPath) || fs.existsSync(railwayTomlPath);
   

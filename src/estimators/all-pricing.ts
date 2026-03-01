@@ -302,67 +302,83 @@ function calculateReplitCost(service: ServiceDetection): ServiceCostEstimate {
 }
 
 function calculateRenderCost(service: ServiceDetection): ServiceCostEstimate {
-  const p = PRICING.render;
   const breakdown: PriceLineItem[] = [];
-  let total = 0;
+  let totalPaid = 0;
+  let totalFree = 0;
+  const warnings: string[] = [...service.warnings];
+  const suggestions: string[] = [];
   
-  const serviceCount = service.configDetails.serviceCount || 1;
-  
-  // Web service
-  if (service.configDetails.hasWebService || serviceCount > 0) {
+  // Web service - CAN be free (but sleeps)
+  if (service.configDetails.hasWebService) {
     breakdown.push({
-      item: 'Web Service (Starter)',
-      quantity: `${serviceCount} service(s)`,
-      unitPrice: '$7/month each',
-      monthly: 7 * serviceCount,
+      item: 'Web Service',
+      quantity: '1 service',
+      unitPrice: 'FREE (sleeps after 15min) or $7/month',
+      monthly: 0,
+      note: 'Free tier available - spins down when idle',
     });
-    total += 7 * serviceCount;
+    suggestions.push('Web service can use FREE tier (sleeps after 15min inactivity)');
   }
   
-  // Worker
+  // Worker - NO FREE TIER!
   if (service.configDetails.hasWorker) {
     breakdown.push({
       item: 'Background Worker',
-      quantity: '24/7',
-      unitPrice: '$7/month',
+      quantity: '24/7 always-on',
+      unitPrice: '$7/month (Starter)',
       monthly: 7,
+      note: '⚠️ Workers have NO free tier!',
     });
-    total += 7;
+    totalPaid += 7;
+    warnings.push('⚠️ Background Workers have NO free tier - minimum $7/month');
   }
   
-  // Postgres
+  // Cron - has free tier
+  if (service.configDetails.hasCron) {
+    breakdown.push({
+      item: 'Cron Job',
+      quantity: 'Scheduled tasks',
+      unitPrice: 'FREE or $1/month',
+      monthly: 0,
+      note: 'Free tier available for cron jobs',
+    });
+  }
+  
+  // Postgres - free but expires
   if (service.configDetails.hasPostgres) {
     breakdown.push({
       item: 'PostgreSQL',
-      quantity: 'Starter',
-      unitPrice: '$7/month',
-      monthly: 7,
-      note: '1GB storage',
+      quantity: '1GB free',
+      unitPrice: 'FREE (90 days) then $7/month',
+      monthly: 0,
+      note: '⚠️ Free DB deleted after 90 days!',
     });
-    total += 7;
+    warnings.push('Free PostgreSQL is deleted after 90 days of inactivity');
   }
   
-  // Redis
+  // Redis - free but tiny
   if (service.configDetails.hasRedis) {
     breakdown.push({
       item: 'Redis',
-      quantity: 'Starter',
-      unitPrice: '$10/month',
-      monthly: 10,
+      quantity: '25MB free',
+      unitPrice: 'FREE or $10/month',
+      monthly: 0,
     });
-    total += 10;
   }
   
   return {
     service: 'Render',
     provider: 'render',
-    monthlyLow: 0,
-    monthlyMid: total,
-    monthlyHigh: total * 2,
+    monthlyLow: totalPaid,  // Minimum if using free tiers
+    monthlyMid: totalPaid,
+    monthlyHigh: totalPaid + 14, // If upgrade web to paid
     breakdown,
-    warnings: service.warnings,
-    suggestions: ['Free tier: sleeps after 15 min', ...service.suggestions],
-    freeUntil: 'Free tier available (spins down)',
+    warnings,
+    suggestions: [
+      ...suggestions,
+      totalPaid === 0 ? '🎉 Can be completely FREE!' : `Minimum cost: $${totalPaid}/month`,
+    ],
+    freeUntil: totalPaid === 0 ? 'Fully free (with limitations)' : undefined,
   };
 }
 
