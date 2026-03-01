@@ -3,13 +3,40 @@
   "displayName": "CloudCost - Estimate Before You Deploy",
   "description": "AI-powered cloud cost estimator for vibe coders. Know your bill before you ship.",
   "version": "0.1.0",
+  "author": "Kathy Feng <fengbo0724@gmail.com>",
+  "license": "MIT",
   "publisher": "kathy-feng",
+  "homepage": "https://github.com/superkf/cloudcost",
   "repository": {
     "type": "git",
     "url": "https://github.com/superkf/cloudcost"
   },
+  "bugs": {
+    "url": "https://github.com/superkf/cloudcost/issues"
+  },
+  "keywords": [
+    "cloud",
+    "cost",
+    "pricing",
+    "estimate",
+    "cloudflare",
+    "vercel",
+    "aws",
+    "serverless",
+    "vibe-coding",
+    "devops"
+  ],
+  "bin": {
+    "cloudcost": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.85.0",
+    "node": ">=18"
   },
   "categories": [
     "Other",
