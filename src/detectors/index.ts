@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { analyzeAiUsage, AiUsagePattern } from './ai-analyzer';
 
 export interface DetectedService {
   name: string;
@@ -9,6 +10,8 @@ export interface DetectedService {
   detectedIn: string[];
   details?: Record<string, any>;
 }
+
+export { AiUsagePattern };
 
 // File patterns to scan
 const SCAN_PATTERNS = [
@@ -163,7 +166,34 @@ export async function scanProject(projectPath: string): Promise<DetectedService[
     }
   }
   
+  // Run detailed AI analysis
+  const aiPatterns = await analyzeAiUsage(projectPath);
+  
+  // Enrich AI service detections with usage patterns
+  for (const pattern of aiPatterns) {
+    const key = `${pattern.provider}-${getAiServiceName(pattern.provider)}`;
+    const existing = detected.get(key);
+    
+    if (existing) {
+      existing.details = { ...existing.details, aiPattern: pattern };
+      // Upgrade confidence if we detected specific model
+      if (pattern.detectedPatterns.some(p => p.startsWith('Model:'))) {
+        existing.confidence = 'high';
+      }
+    }
+  }
+  
   return Array.from(detected.values());
+}
+
+function getAiServiceName(provider: string): string {
+  const names: Record<string, string> = {
+    openai: 'OpenAI API',
+    anthropic: 'Anthropic Claude',
+    google: 'Google Gemini',
+    deepseek: 'DeepSeek',
+  };
+  return names[provider] || provider;
 }
 
 function addDetection(

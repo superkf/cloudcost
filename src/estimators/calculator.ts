@@ -1,5 +1,7 @@
 import { DetectedService } from '../detectors';
+import { AiUsagePattern } from '../detectors/ai-analyzer';
 import { PRICING_DATA } from './pricing-data';
+import { calculateAiMonthlyCost, getAiPricing } from './ai-pricing';
 
 export interface CostEstimate {
   service: DetectedService;
@@ -187,34 +189,102 @@ function calculateContainerCost(service: DetectedService, pricing: any) {
 function calculateAiApiCost(service: DetectedService, pricing: any) {
   const breakdown: CostBreakdownItem[] = [];
   const warnings: string[] = [];
+  const suggestions: string[] = [];
   
-  const tokensPerMonth = DEFAULT_USAGE.aiTokensPerDay * 30;
-  const inputTokens = tokensPerMonth * 0.3; // Assume 30% input
-  const outputTokens = tokensPerMonth * 0.7; // 70% output
+  // Use detected AI usage patterns if available
+  const aiPattern = service.details?.aiPattern as AiUsagePattern | undefined;
   
-  const inputCost = (inputTokens / 1000000) * (pricing.inputPerMillion || 0);
-  const outputCost = (outputTokens / 1000000) * (pricing.outputPerMillion || 0);
+  const model = aiPattern?.model || getDefaultModel(service.provider);
+  const callsPerDay = aiPattern?.estimatedCallsPerDay || 100;
+  const avgInputTokens = aiPattern?.avgInputTokens || 500;
+  const avgOutputTokens = aiPattern?.avgOutputTokens || 1000;
+  
+  const costCalc = calculateAiMonthlyCost(
+    service.provider,
+    model,
+    callsPerDay,
+    avgInputTokens,
+    avgOutputTokens
+  );
+  
+  const aiPricing = getAiPricing(service.provider, model);
+  
+  breakdown.push({
+    item: `Model: ${model}`,
+    quantity: `${callsPerDay} calls/day`,
+    unitPrice: `$${aiPricing.inputPer1M}/$${aiPricing.outputPer1M} per 1M`,
+    subtotal: costCalc.mid
+  });
   
   breakdown.push({
     item: 'Input Tokens',
-    quantity: `${(inputTokens / 1000).toFixed(0)}K / month`,
-    unitPrice: `$${pricing.inputPerMillion || 0} per 1M tokens`,
-    subtotal: inputCost
+    quantity: `${(callsPerDay * 30 * avgInputTokens / 1000).toFixed(0)}K/month`,
+    unitPrice: `$${aiPricing.inputPer1M}/1M`,
+    subtotal: (callsPerDay * 30 * avgInputTokens / 1_000_000) * aiPricing.inputPer1M
   });
   
   breakdown.push({
     item: 'Output Tokens',
-    quantity: `${(outputTokens / 1000).toFixed(0)}K / month`,
-    unitPrice: `$${pricing.outputPerMillion || 0} per 1M tokens`,
-    subtotal: outputCost
+    quantity: `${(callsPerDay * 30 * avgOutputTokens / 1000).toFixed(0)}K/month`,
+    unitPrice: `$${aiPricing.outputPer1M}/1M`,
+    subtotal: (callsPerDay * 30 * avgOutputTokens / 1_000_000) * aiPricing.outputPer1M
   });
   
-  warnings.push('AI API costs can spike with heavy usage!');
+  // Add warnings based on model
+  if (aiPattern?.modelTier === 'expensive') {
+    warnings.push(`⚠️ Using expensive model (${model})!`);
+    suggestions.push(getCheaperAlternative(service.provider, model));
+  }
   
-  const low = inputCost + outputCost;
-  const high = low * 5; // AI usage can vary a lot
+  if (aiPattern?.hasVision) {
+    warnings.push('Vision API detected - image inputs cost extra');
+  }
   
-  return { low, high, breakdown, warnings, suggestions: [] };
+  if (callsPerDay > 500) {
+    warnings.push('High API call frequency detected');
+  }
+  
+  // Detected patterns
+  if (aiPattern?.detectedPatterns.length) {
+    suggestions.push(`Detected: ${aiPattern.detectedPatterns.slice(0, 3).join(', ')}`);
+  }
+  
+  return { 
+    low: costCalc.low, 
+    high: costCalc.high, 
+    breakdown, 
+    warnings, 
+    suggestions 
+  };
+}
+
+function getDefaultModel(provider: string): string {
+  const defaults: Record<string, string> = {
+    openai: 'gpt-4o',
+    anthropic: 'claude-3-5-sonnet',
+    google: 'gemini-1.5-flash',
+    deepseek: 'deepseek-chat',
+  };
+  return defaults[provider] || 'unknown';
+}
+
+function getCheaperAlternative(provider: string, model: string): string {
+  const alternatives: Record<string, Record<string, string>> = {
+    openai: {
+      'gpt-4': '💡 Use gpt-4o instead (10x cheaper)',
+      'gpt-4-turbo': '💡 Use gpt-4o instead (4x cheaper)',
+      'o1': '💡 Use o3-mini for simpler reasoning tasks',
+    },
+    anthropic: {
+      'claude-3-opus': '💡 Use claude-sonnet-4 (5x cheaper)',
+      'claude-opus-4': '💡 Use claude-sonnet-4 for most tasks',
+    },
+    google: {
+      'gemini-1.5-pro': '💡 Use gemini-2.0-flash (10x cheaper)',
+    },
+  };
+  
+  return alternatives[provider]?.[model] || '💡 Consider a smaller model for cost savings';
 }
 
 function calculateDatabaseCost(service: DetectedService, pricing: any) {
