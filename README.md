@@ -28,28 +28,36 @@ Estimated Monthly Cost: $12 - $47
 🗄️ Supabase              $0 - $25/mo
 ```
 
-## Supported Services
+## Supported Services (25+)
 
-### Serverless
+### Serverless / Edge
 - CloudFlare Workers
-- Vercel
+- Vercel (Edge + Serverless)
 - Netlify Functions
+- Deno Deploy
+- AWS Lambda
+- Google Cloud Run
+- Supabase Edge Functions
 
-### Containers
-- CloudFlare Containers
+### Containers / PaaS
+- CloudFlare Containers ⚠️
 - Fly.io
 - Railway
-
-### AI APIs
-- OpenAI (GPT-4, GPT-4o)
-- Anthropic Claude
-- Google Gemini
-- DeepSeek
+- Render
+- Replit
+- Heroku
+- DigitalOcean App Platform
 
 ### Databases
-- Supabase
+- Supabase (Postgres)
 - PlanetScale
 - Neon
+- Turso (SQLite Edge)
+- CloudFlare D1
+
+### Realtime / Backends
+- Convex
+- Upstash (Redis/Kafka/QStash)
 
 ### Storage
 - CloudFlare R2
