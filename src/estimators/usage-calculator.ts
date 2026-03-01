@@ -39,6 +39,7 @@ export interface ServicePricing {
     perGbDatabase?: number;
     basePlan?: number;  // Fixed monthly fee if required
     forceBasePlan?: boolean;  // Always charge base plan (no free tier)
+    creditIncluded?: number;  // Credit included in base plan (e.g., Railway $5)
   };
   
   // Warnings
