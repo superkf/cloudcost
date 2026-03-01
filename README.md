@@ -68,11 +68,46 @@ Estimated Monthly Cost: $12 - $47
 
 ## Installation
 
-### From VS Code Marketplace
-1. Open VS Code
-2. Go to Extensions (Ctrl+Shift+X)
-3. Search "CloudCost"
-4. Install
+```bash
+npm install -g cloudcost
+```
+
+## Usage
+
+### CLI
+```bash
+cloudcost ./my-project
+```
+
+### With Claude Code / Cursor / AI Coding Assistants
+
+Add this to your project's `AGENTS.md` or system prompt:
+
+```markdown
+## Cost Awareness
+When writing code that uses cloud services (CloudFlare Workers/Containers, 
+Vercel, R2, databases, etc.), run `cloudcost .` to estimate deployment costs
+and warn the user before they deploy.
+```
+
+Now your AI assistant will automatically check costs when you're about to deploy!
+
+**Example interaction:**
+```
+You: Deploy this to CloudFlare
+
+Claude: Let me check the estimated costs first...
+[runs: cloudcost .]
+
+⚠️ Heads up! Based on your code:
+- CloudFlare Containers: ~$25/month (always-on)
+- R2 Storage: ~$0.15/month (10GB)
+
+💡 Suggestion: Consider using Workers instead of Containers 
+   for event-driven workloads - it's pay-per-request.
+
+Want me to proceed with deployment?
+```
 
 ### From Source
 ```bash
@@ -80,7 +115,6 @@ git clone https://github.com/superkf/cloudcost
 cd cloudcost
 npm install
 npm run compile
-# Then press F5 to test in VS Code
 ```
 
 ## Usage
