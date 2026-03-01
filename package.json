@@ -1,0 +1,80 @@
+{
+  "name": "cloudcost",
+  "displayName": "CloudCost - Estimate Before You Deploy",
+  "description": "AI-powered cloud cost estimator for vibe coders. Know your bill before you ship.",
+  "version": "0.1.0",
+  "publisher": "kathy-feng",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/superkf/cloudcost"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "cloud",
+    "cost",
+    "pricing",
+    "cloudflare",
+    "vercel",
+    "aws",
+    "openai",
+    "anthropic",
+    "vibe-coding"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cloudcost.estimate",
+        "title": "CloudCost: Estimate Deployment Cost"
+      },
+      {
+        "command": "cloudcost.scan",
+        "title": "CloudCost: Scan Project for Cloud Services"
+      }
+    ],
+    "configuration": {
+      "title": "CloudCost",
+      "properties": {
+        "cloudcost.autoScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan for cloud services on file save"
+        },
+        "cloudcost.showOnDeploy": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show cost estimate before deploy commands"
+        },
+        "cloudcost.monthlyTrafficEstimate": {
+          "type": "number",
+          "default": 10000,
+          "description": "Estimated monthly requests for cost calculation"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}
